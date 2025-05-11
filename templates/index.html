@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portefeuille de Marcel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .value-display {
+            font-size: 48px;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+        }
+        .message-display {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 10px;
+            color: #666;
+            font-style: italic;
+        }
+        .timestamp-display {
+            font-size: 14px;
+            margin: 5px 0;
+            color: #999;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .amount-input {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 100px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+        .euro-symbol {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        .transaction-history {
+            margin-top: 30px;
+            width: 100%;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .positive-change {
+            color: green;
+        }
+        
+        .negative-change {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Portefeuille de Marcel</h1>
+        <div class="value-display" id="currentValue">€0,00</div>
+        <div class="message-display" id="currentMessage">Bienvenue sur le portefeuille de Marcel !</div>
+        <div class="timestamp-display" id="lastUpdated">Dernière mise à jour : Jamais</div>
+        
+        <div class="controls">
+            <div class="amount-input">
+                <span class="euro-symbol">€</span>
+                <input type="number" id="euros" min="0" placeholder="Euros" required>
+                <input type="number" id="cents" min="0" max="99" placeholder="Centimes" required>
+            </div>
+            <button onclick="updateValue()">Mettre à jour le montant</button>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="message" placeholder="Ajouter un message pour Marcel..." maxlength="100">
+            <button onclick="updateMessage()">Mettre à jour le message</button>
+        </div>
+
+        <div class="transaction-history">
+            <h2>Historique des transactions</h2>
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Montant précédent</th>
+                        <th>Nouveau montant</th>
+                        <th>Variation</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsBody">
+                </tbody>
+            </table>
+        </div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        function formatEuro(amount) {
+            const euros = Math.floor(amount);
+            const cents = Math.round((amount - euros) * 100);
+            return `€${euros},${cents.toString().padStart(2, '0')}`;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return "Jamais";
+            
+            const date = new Date(dateString);
+            return `Dernière mise à jour : ${date.toLocaleString('fr-FR')}`;
+        }
+
+        async function updateDisplay() {
+            try {
+                const response = await fetch('/value');
+                const data = await response.json();
+                document.getElementById('currentValue').textContent = formatEuro(data.value);
+                document.getElementById('currentMessage').textContent = data.message;
+                document.getElementById('lastUpdated').textContent = formatDate(data.last_updated);
+            } catch (error) {
+                showError('Impossible de récupérer la valeur');
+            }
+        }
+
+        async function updateTransactionHistory() {
+            try {
+                const response = await fetch('/transactions');
+                if (response.ok) {
+                    const data = await response.json();
+                    const tbody = document.getElementById('transactionsBody');
+                    tbody.innerHTML = '';
+                    
+                    data.transactions.reverse().forEach(transaction => {
+                        const row = document.createElement('tr');
+                        const date = new Date(transaction.timestamp);
+                        const change = transaction.value - transaction.previous_value;
+                        const changeClass = change >= 0 ? 'positive-change' : 'negative-change';
+                        
+                        row.innerHTML = `
+                            <td>${date.toLocaleString('fr-FR')}</td>
+                            <td>${formatEuro(transaction.previous_value)}</td>
+                            <td>${formatEuro(transaction.value)}</td>
+                            <td class="${changeClass}">${change >= 0 ? '+' : ''}${formatEuro(change)}</td>
+                            <td>${transaction.message}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                showError('Impossible de récupérer l\'historique');
+            }
+        }
+
+        async function updateValue() {
+            const euros = parseFloat(document.getElementById('euros').value) || 0;
+            const cents = parseFloat(document.getElementById('cents').value) || 0;
+            const newValue = euros + (cents / 100);
+            
+            try {
+                const response = await fetch('/value', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ new_value: newValue })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('euros').value = '';
+                    document.getElementById('cents').value = '';
+                    updateDisplay();
+                    updateTransactionHistory();
+                } else {
+                    showError('Erreur lors de la mise à jour du montant');
+                }
+            } catch (error) {
+                showError('Erreur lors de la mise à jour du montant');
+            }
+        }
+
+        async function updateMessage() {
+            const message = document.getElementById('message').value;
+            
+            try {
+                const response = await fetch('/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('message').value = '';
+                    updateDisplay();
+                    updateTransactionHistory();
+                } else {
+                    showError('Erreur lors de la mise à jour du message');
+                }
+            } catch (error) {
+                showError('Erreur lors de la mise à jour du message');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            setTimeout(() => {
+                errorDiv.textContent = '';
+            }, 3000);
+        }
+
+        // Initial load
+        updateDisplay();
+        updateTransactionHistory();
+    </script>
+</body>
+</html> 

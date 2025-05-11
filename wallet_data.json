@@ -1,0 +1,73 @@
+{
+  "current_value": 4.47,
+  "current_message": "Bonjour Marcel! Tu vas pouvoir t'acheter de belles choses",
+  "last_updated": "2025-05-09T17:44:16.242019",
+  "transactions": [
+    {
+      "timestamp": "2025-04-13T13:35:48.338615",
+      "value": 12.77,
+      "previous_value": 0.0,
+      "message": "Début",
+      "user": "admin"
+    },
+    {
+      "timestamp": "2025-04-13T13:36:23.369814",
+      "value": 10.77,
+      "previous_value": 12.77,
+      "message": "Coucou Marcel !",
+      "user": "admin"
+    },
+    {
+      "timestamp": "2025-04-13T17:20:47.986901",
+      "value": 1.77,
+      "previous_value": 10.77,
+      "message": "Presque fini !",
+      "user": "admin"
+    },
+    {
+      "timestamp": "2025-04-17T21:06:18.972936",
+      "value": 4.77,
+      "previous_value": 1.77,
+      "message": "Bienvenue sur le portefeuille de Marcel !",
+      "user": "admin"
+    },
+    {
+      "timestamp": "2025-04-30T20:54:01.477623",
+      "value": 2.77,
+      "previous_value": 4.77,
+      "message": "Bienvenue sur le portefeuille de Marcel !",
+      "user": "admin"
+    },
+    {
+      "timestamp": "2025-05-04T09:12:54.153261",
+      "value": 5.77,
+      "previous_value": 2.77,
+      "message": "Bienvenue sur le portefeuille de Marcel !",
+      "user": "admin"
+    },
+    {
+      "timestamp": "2025-05-08T08:38:41.582757",
+      "value": 5.77,
+      "previous_value": 5.77,
+      "message": "Bonjour Marcel"
+    },
+    {
+      "timestamp": "2025-05-08T08:43:27.885486",
+      "value": 5.77,
+      "previous_value": 5.77,
+      "message": "Bonjour Marcel! Tu vas pouvoir t'acheter de belles choses"
+    },
+    {
+      "timestamp": "2025-05-09T17:43:54.834838",
+      "value": 4.77,
+      "previous_value": 5.77,
+      "message": "Updated value to 4.77€"
+    },
+    {
+      "timestamp": "2025-05-09T17:44:16.241942",
+      "value": 4.47,
+      "previous_value": 4.77,
+      "message": "Updated value to 4.47€"
+    }
+  ]
+}
